@@ -25,8 +25,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Svi mogu na login
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/lekar/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/sestra/**").hasRole("NURSE")
+                        .requestMatchers("/api/doctor/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/nurse/**").hasRole("NURSE")
                         .anyRequest().authenticated() // Sve ostalo zahteva login
                 )
                 .sessionManagement(session -> session
