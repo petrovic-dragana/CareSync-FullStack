@@ -12,20 +12,20 @@ import java.time.LocalDate;
 @Controller
 @RequestMapping("/records")
 public class HealthRecordController {
-
-    @Autowired
-    private HealthRecordService recordService;
-
-    @PostMapping("/save")
-    public String saveRecord(@ModelAttribute("record") HealthRecord record) {
-        record.setEntryDate(LocalDate.now()); // Automatski postavljamo današnji datum
-        recordService.saveRecord(record);
-        return "redirect:/appointments"; // Vraćamo se na termine
-    }
-
-    @GetMapping("/patient/{id}")
-    public String showPatientHistory(@PathVariable Long id, Model model) {
-        model.addAttribute("history", recordService.getRecordsByPatient(id));
-        return "health-records/history";
-    }
+//
+//    @Autowired
+//    private HealthRecordService recordService;
+//
+//    @PostMapping("/save")
+//    public String saveRecord(@ModelAttribute("record") HealthRecord record) {
+//        record.setEntryDate(LocalDate.now()); // Automatski postavljamo današnji datum
+//        recordService.saveRecord(record);
+//        return "redirect:/appointments"; // Vraćamo se na termine
+//    }
+//
+//    @GetMapping("/patient/{id}")
+//    public String showPatientHistory(@PathVariable Long id, Model model) {
+//        model.addAttribute("history", recordService.getRecordsByPatient(id));
+//        return "health-records/history";
+//    }
 }

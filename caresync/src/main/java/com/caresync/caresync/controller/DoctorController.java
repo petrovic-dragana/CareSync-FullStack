@@ -21,11 +21,11 @@ public class DoctorController {
 //        model.addAttribute("sviDoktori", doctorService.getAllDoctors());
 //        return "doctors-list"; // Ovo je naziv HTML fajla koji ćemo napraviti
 //    }
-@GetMapping("/doctors")
-public String showDoctors(Model model) {
-    // Pozivamo getAllDoctors() koji je sada sortiran
-    model.addAttribute("sviDoktori", doctorService.getAllDoctors());
-    return "doctors-list";
-}
+//@GetMapping("/doctors")
+//public String showDoctors(Model model) {
+//    // Pozivamo getAllDoctors() koji je sada sortiran
+//    model.addAttribute("sviDoktori", doctorService.getAllDoctors());
+//    return "doctors-list";
+//}
 
 }
