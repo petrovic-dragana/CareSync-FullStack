@@ -11,6 +11,9 @@ import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
+    List<Appointment> findByPatientIdAndStatus(Long patientId, AppointmentStatus status);
+    List<Appointment> findByPatientIdAndStatusInOrderByCreatedAtDesc(Long patientId, List<AppointmentStatus> statuses);
+
     // Lekar će videti samo svoje termine koji nisu još naplaćeni
     List<Appointment> findByDoctorAndStatusNot(User doctor, AppointmentStatus status);
 

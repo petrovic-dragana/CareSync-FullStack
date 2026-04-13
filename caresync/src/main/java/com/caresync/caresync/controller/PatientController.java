@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sestra/patients")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/nurse/patients")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PatientController {
 
     @Autowired

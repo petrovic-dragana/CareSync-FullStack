@@ -2,6 +2,9 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import NurseDashboard from "./pages/NurseDashboard";
+import DoctorDashboard from "./pages/DoctorDasboard";
+import PatientDetail from './pages/PatientDetail';
 
 function App() {
   return (
@@ -11,8 +14,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           {/* Ovde ćemo kasnije dodati rute za Dashboard-e */}
 
-          <Route path="/doctor-dashboard" element={<h1>Dobrodošao, Doktore!</h1>} />
-          <Route path="/nurse-dashboard" element={<h1>Dobrodošla, Sestro!</h1>} />
+          <Route path="/doctor-dashboard" element={<DoctorDashboard/>} />
+          <Route path="/nurse-dashboard" element={<NurseDashboard/>} />
+          <Route path="/patient-detail/:id" element={<PatientDetail />} />
         </Routes>
       </Router>
   );

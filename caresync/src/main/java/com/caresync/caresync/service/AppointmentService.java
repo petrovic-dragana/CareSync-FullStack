@@ -3,6 +3,8 @@ package com.caresync.caresync.service;
 import com.caresync.caresync.model.Appointment;
 import com.caresync.caresync.model.Doctor;
 
+import com.caresync.caresync.repository.AppointmentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,6 +14,13 @@ import java.util.List;
 
 @Service
 public class AppointmentService {
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
+    }}
 //
 //    public List<Appointment> getAllAppointments() {
 //        return storage.getAppointments();
@@ -100,4 +109,4 @@ public class AppointmentService {
 //        }
 //        return slots;
 //    }
-}
+

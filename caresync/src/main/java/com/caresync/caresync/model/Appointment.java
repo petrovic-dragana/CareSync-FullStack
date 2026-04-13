@@ -31,6 +31,9 @@ public class Appointment {
 
     // Polja koja popunjava LEKAR
     @Column(columnDefinition = "TEXT")
+    private String anamnesis;
+
+    @Column(columnDefinition = "TEXT")
     private String diagnosis;
 
     @Column(columnDefinition = "TEXT")
