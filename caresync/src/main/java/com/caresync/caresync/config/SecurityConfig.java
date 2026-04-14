@@ -31,15 +31,31 @@ public class SecurityConfig {
                 }))
                 .csrf(csrf -> csrf.disable()) // Onemogućavamo zbog REST-a i React-a
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Svi mogu na login
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/nurse/**").hasRole("NURSE")
-                        // U SecurityConfig.java, unutar authorizeHttpRequests:
+                        // 1. Potpuno javne rute (BEZ TOKENA)
+                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+                        .requestMatchers("/users/**", "/api/users/**").permitAll()
+
+                        .requestMatchers("/admin/**", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/stats/**").hasAnyRole("DOCTOR", "NURSE", "ADMIN")
+
+                        // 2. Specifične rute za DOKTORA
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/appointments/*/diagnose").hasRole("DOCTOR")
                         .requestMatchers("/api/appointments/patient/*/history").hasRole("DOCTOR")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/appointments/**").hasAnyRole("DOCTOR", "NURSE")
-                        .requestMatchers("/api/appointments/**").hasAnyRole("DOCTOR", "NURSE")
-                        .anyRequest().authenticated() // Sve ostalo zahteva login
+
+                        // 3. Specifične rute za SESTRU
+                        .requestMatchers("/api/stats/nurse-dashboard").hasRole("NURSE")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/appointments/*/pay").hasRole("NURSE")
+                        .requestMatchers("/api/appointments/schedule").hasRole("NURSE")
+
+                        // 4. Zajedničke rute (Termini, Lista doktora...)
+                        .requestMatchers("/api/appointments/**").hasAnyRole("DOCTOR", "NURSE", "ADMIN")
+                        .requestMatchers("/api/users/doctors").hasAnyRole("DOCTOR", "NURSE", "ADMIN")
+                        // U SecurityConfig.java
+                        .requestMatchers("/api/stats/**").hasAnyRole("DOCTOR", "NURSE", "ADMIN")
+                        .requestMatchers("/api/auth/update-password").authenticated()
+                        .requestMatchers("/api/stats/**").hasAnyRole("DOCTOR", "ADMIN")
+                        // 5. Sve ostalo mora biti autentifikovano
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Bitno za JWT

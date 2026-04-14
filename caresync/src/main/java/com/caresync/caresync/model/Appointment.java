@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "appointments")
@@ -16,11 +18,11 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDateTime appointmentDate;
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
 
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
@@ -28,6 +30,8 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
+    private LocalTime appointmentTime;
+    private LocalDate appointmentDate;
 
     // Polja koja popunjava LEKAR
     @Column(columnDefinition = "TEXT")

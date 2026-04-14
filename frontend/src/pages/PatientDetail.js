@@ -20,9 +20,10 @@ const PatientDetail = () => {
                const appRes = await api.get(`/appointments/${id}`);
                setAppointment(appRes.data);
 
-               // 2. Učitaj istoriju za tog pacijenta
-               const historyRes = await api.get(`/appointments/patient/${appRes.data.patient.id}/history`);
-               setHistory(historyRes.data);
+               if (appRes.data.patient?.id) {
+                   const historyRes = await api.get(`/appointments/patient/${appRes.data.patient.id}/history`);
+                   setHistory(historyRes.data);
+               }
            } catch (err) {
                console.error("Greška pri učitavanju podataka: ", err);
            }

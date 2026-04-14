@@ -10,7 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -27,19 +32,38 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
-        // 1. Provera identiteta (Spring Security radi proveru lozinke)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
 
-        // 2. Ako je uspešno, generiši token
         String token = jwtUtils.generateToken(authRequest.getUsername());
+        User user = userRepository.findByUsername(authRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("Korisnik nije pronadjen!"));
 
-        // 3. Pronađi korisnika da bismo poslali i njegovu ulogu
-        User user = userRepository.findByUsername(authRequest.getUsername()).get();
+        return ResponseEntity.ok(new AuthResponse(
+                token,
+                user.getRole().name(),
+                user.isMustChangePassword(),
+                user.getLastName()
+        ));
+    }
+    @PostMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> request) {
+        // 1. Dobijamo trenutno ulogovanog korisnika iz SecurityContext-a
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Korisnik nije pronađen"));
 
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name()));
+        // 2. Hash-ujemo novu lozinku i gasimo mustChangePassword
+        user.setPassword(passwordEncoder.encode(request.get("newPassword")));
+        user.setMustChangePassword(false);
+
+        userRepository.save(user);
+        return ResponseEntity.ok("Lozinka uspešno ažurirana");
     }
 }

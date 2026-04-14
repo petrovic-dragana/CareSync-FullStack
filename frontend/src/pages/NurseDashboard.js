@@ -1,61 +1,120 @@
 import React, { useState, useEffect } from 'react';
-import patientService from '../services/patient.service';
+import api from '../services/api';
+import { useNavigate } from "react-router-dom";
 
 const NurseDashboard = () => {
-  const [patients, setPatients] = useState([]);
-  const [newPatient, setNewPatient] = useState({ firstName: '', lastName: '', jmbg: '', phone: '' });
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    todayAppointmentsCount: 0,
+    activeDoctors: 0,
+    todayList: []
+  });
 
-  // 1. Učitaj pacijente iz MySQL baze
   useEffect(() => {
-    loadPatients();
+    const fetchStats = async () => {
+      try {
+        const res = await api.get(`/stats/nurse-dashboard`);        setStats(res.data);
+      } catch (err) {
+        console.error("Neuspelo povlačenje statistike", err);
+      }
+    };
+    fetchStats();
   }, []);
 
-  const loadPatients = async () => {
-    const response = await patientService.getAllPatients();
-    setPatients(response.data);
+  const cardStyle = {
+    flex: 1, backgroundColor: '#fff', padding: '20px', borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', border: '1px solid #eee'
   };
 
-  // 2. Funkcija za dodavanje novog pacijenta
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await patientService.createPatient(newPatient);
-    setNewPatient({ firstName: '', lastName: '', jmbg: '', phone: '' }); // Reset forme
-    loadPatients(); // Osveži tabelu
+  const buttonStyle = {
+    padding: '12px 24px', borderRadius: '8px', border: 'none',
+    fontWeight: 'bold', cursor: 'pointer', marginRight: '15px'
   };
+
+  const thStyle = { padding: '12px', textAlign: 'left', borderBottom: '2px solid #eee', color: '#666' };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Dashboard za Medicinsku Sestru</h1>
+      <div style={{ padding: '40px', backgroundColor: '#fdfdfd', minHeight: '90vh' }}>
+        <h1 style={{ color: '#1a2b4b', marginBottom: '30px' }}>Kontrolna tabla</h1>
 
-      <h3>Registracija novog pacijenta</h3>
-      <form onSubmit={handleSubmit} style={{ marginBottom: '30px' }}>
-        <input placeholder="Ime" value={newPatient.firstName} onChange={e => setNewPatient({...newPatient, firstName: e.target.value})} />
-        <input placeholder="Prezime" value={newPatient.lastName} onChange={e => setNewPatient({...newPatient, lastName: e.target.value})} />
-        <input placeholder="JMBG" value={newPatient.jmbg} onChange={e => setNewPatient({...newPatient, jmbg: e.target.value})} />
-        <input placeholder="Telefon" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
-        <button type="submit">Sačuvaj u bazu</button>
-      </form>
+        {/* STATISTIČKE KARTICE */}
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '40px' }}>
+          <div style={cardStyle}>
+            <p style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Pacijenti</p>
+            <h2 style={{ color: '#2d6cdf' }}>{stats.totalPatients}</h2>
+          </div>
+          <div style={cardStyle}>
+            <p style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Današnji termini</p>
+            <h2 style={{ color: '#2d6cdf' }}>{stats.todayAppointmentsCount}</h2>
+          </div>
+          <div style={cardStyle}>
+            <p style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Lekari</p>
+            <h2 style={{ color: '#2d6cdf' }}>{stats.activeDoctors}</h2>
+          </div>
+        </div>
 
-      <h3>Lista pacijenata u sistemu</h3>
-      <table border="1" width="100%">
-        <thead>
-          <tr>
-            <th>Ime i Prezime</th>
-            <th>JMBG</th>
-            <th>Telefon</th>
-          </tr>
-        </thead>
-        <tbody>
-          {patients.map(p => (
-            <tr key={p.id}>
-              <td>{p.firstName} {p.lastName}</td>
-              <td>{p.jmbg}</td>
-              <td>{p.phone}</td>
+        {/* AKCIJE */}
+        <div style={{ display: 'flex', marginBottom: '30px' }}>
+          <button onClick={() => navigate('/appointments')} style={{ ...buttonStyle, backgroundColor: '#2d6cdf', color: '#fff' }}>
+            + Nova rezervacija
+          </button>
+        </div>
+
+        {/* TABELA SA DANASNJIM TERMINIMA - POPRAVLJENA STRUKTURA */}
+        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+          <h3 style={{ marginBottom: '20px' }}>📅 Današnji raspored</h3>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+            <tr>
+              <th style={thStyle}>Pacijent</th>
+              <th style={thStyle}>Vreme</th>
+              <th style={thStyle}>Doktor</th>
+              <th style={thStyle}>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            {/*<tbody>*/}
+            {/*{stats.todayList.length > 0 ? (*/}
+            {/*    stats.todayList.map(app => (*/}
+            {/*        <tr key={app.id} style={{ borderBottom: '1px solid #eee' }}>*/}
+            {/*          <td style={{ padding: '12px' }}>*/}
+            {/*            {app.patient ? `${app.patient.firstName} ${app.patient.lastName}` : 'Nepoznat pacijent'}*/}
+            {/*          </td>*/}
+            {/*          <td style={{ padding: '12px' }}>{app.appointmentTime || 'N/A'}</td>*/}
+            {/*          <td style={{ padding: '12px' }}>*/}
+            {/*            dr {app.doctor ? `${app.doctor.lastName}` : 'N/A'} ({app.doctor?.specialization})*/}
+            {/*          </td>*/}
+            {/*          <td style={{ padding: '12px' }}>*/}
+            {/*        <span style={{ padding: '4px 8px', borderRadius: '4px', backgroundColor: '#e1f5fe', color: '#01579b', fontSize: '11px', fontWeight: 'bold' }}>*/}
+            {/*          {app.status}*/}
+            {/*        </span>*/}
+            {/*          </td>*/}
+            {/*        </tr>*/}
+            {/*    ))*/}
+            {/*) : (*/}
+            {/*    <tr>*/}
+            {/*      <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#999' }}>Nema termina za danas.</td>*/}
+            {/*    </tr>*/}
+            {/*)}*/}
+            {/*</tbody>*/}
+            <tbody>
+            {stats.todayList && stats.todayList.length > 0 ? (
+                stats.todayList.map(app => (
+                    <tr key={app.id}>
+                      <td>{app.patient?.firstName} {app.patient?.lastName}</td>
+                      <td>{app.appointmentTime}</td>
+                      <td>dr {app.doctor?.lastName} - {app.doctor?.specialization}</td>
+                      <td>{app.status}</td>
+                    </tr>
+                ))
+            ) : (
+                <tr><td colSpan="4">Nema termina za danas u bazi.</td></tr>
+            )}
+            </tbody>
+          </table>
+        </div>
+      </div>
   );
 };
 
