@@ -1,5 +1,6 @@
 package com.caresync.caresync.controller;
 
+import com.caresync.caresync.model.Appointment;
 import com.caresync.caresync.model.AppointmentStatus;
 import com.caresync.caresync.model.Role;
 import com.caresync.caresync.model.User;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,15 +57,27 @@ public class AdminController {
     }
 
     @GetMapping("/report")
-    public Map<String, Object> getWorkReport() {
+    public ResponseEntity<?> getWorkReport(@RequestParam(defaultValue = "7") int days) {
+        LocalDate startDate = LocalDate.now().minusDays(days);
+
+        List<Appointment> apps = appointmentRepository.findByStatusAndAppointmentDateGreaterThanEqual(
+                AppointmentStatus.NAPLACENO, startDate
+        );
+
+        double totalRevenue = 0.0;
+        for (Appointment a : apps) {
+            if (a.getPrice() != null) {
+                totalRevenue += a.getPrice();
+            }
+        }
+
         Map<String, Object> report = new HashMap<>();
-        long completedAppointments = appointmentRepository.countByStatus(AppointmentStatus.ZAVRSENO);
+        report.put("reportDate", LocalDate.now().toString());
+        report.put("periodDays", days);
+        report.put("completedAppointments", apps.size());
+        report.put("revenue", totalRevenue); // Šaljemo totalRevenue varijablu
 
-        report.put("completedAppointments", completedAppointments);
-        report.put("revenue", completedAppointments * 2500); // Primer fiksne cene po pregledu
-        report.put("reportDate", java.time.LocalDate.now().toString());
-
-        return report;
+        return ResponseEntity.ok(report);
     }
     @GetMapping("/logs")
     public List<Map<String, String>> getSystemLogs() {
